@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>搜索算法</title>
+		<style>
+			button,textarea{
+				display: inline-block;
+				margin-right: 10px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<input type="text" id="st" value='A' />
+		<button onclick="bellmanFord(graph, start);">Bellman-Ford</button>
+		<button onclick="floydWarshall(graph);">Floyd</button>
+		<button onclick="spfa(graph, start);">SPFA</button>
+		<button onclick="dijkstra(graph, start);">Dijkstra</button>
+		<br>
+		<textarea id="result"></textarea>
+		<textarea id="counter"></textarea>
+	</body>
+	<script>
+		var start = document.getElementById("st").value;
+		const graph = {
+			A: {B: 5,C: 10},
+			B: {D: 3},
+			C: {D: 1},
+			D: {},
+		};
+
+		// 定义计数器
+		var counter = 0;
+
+		function bellmanFord(graph, start) {
+			resetCounter();
+			let distances = {};
+			let vertices = Object.keys(graph);
+
+			// Step 1: 填充距离数组
+			incrementCounter();
+			vertices.forEach((vertex) => {
+				distances[vertex] = Infinity;
+				incrementCounter();
+			});
+			distances[start] = 0;
+
+			// Step 2: 松弛所有边
+			incrementCounter();
+			for(let i = 0; i < vertices.length - 1; i++){
+				incrementCounter();
+				for(let v = 0; v < vertices.length; v++){
+					incrementCounter();
+					let edges = graph[vertices[v]];
+					if(edges){
+						incrementCounter();
+						Object.keys(edges).forEach((toNode) => {
+							incrementCounter();
+							let weight = edges[toNode];
+							let distanceInQuestion = distances[vertices[v]] + weight;
+							incrementCounter();
+							if(distanceInQuestion < distances[toNode]){
+								distances[toNode] = distanceInQuestion;
+							}
+						})
+					}
+				}
+			}
+
+			// Step 3: 检查负权重环
+			incrementCounter();
+			for(let v = 0; v < vertices.length; v++){
+				incrementCounter();
+				let edges = graph[vertices[v]];
+				if(edges){
+					incrementCounter();
+					Object.keys(edges).forEach((toNode) => {
+						incrementCounter();
+						let weight = edges[toNode];
+						let distanceInQuestion = distances[vertices[v]] + weight;
+						incrementCounter();
+						if(distanceInQuestion < distances[toNode]){
+							document.getElementById('result').value = '存在负权重环';
+							document.getElementById('counter').value = counter;
+							return;
+						}
+					})
+				}
+			}
+			document.getElementById('result').value =  JSON.stringify(distances);
+			document.getElementById('counter').value = counter;
+		}
+
+		function floydWarshall(graph) {
+			resetCounter();
+			let dist = {};
+			let vertices = Object.keys(graph);
+
+			vertices.forEach((start) => {
+				dist[start] = {};
+				vertices.forEach((end) => {
+					incrementCounter();
+					if(start === end){
+						incrementCounter();
+						dist[start][end] = 0;
+					} else if(graph[start] && graph[start][end]){
+						incrementCounter();
+						dist[start][end] = graph[start][end];
+					} else {
+						incrementCounter();
+						dist[start][end] = Infinity;
+					}
+				})
+			});
+
+			for (let k = 0; k < vertices.length; k++) {
+				incrementCounter();
+				for (let i = 0; i < vertices.length; i++) {
+					incrementCounter();
+					for (let j = 0; j < vertices.length; j++) {
+						incrementCounter();
+						if (dist[vertices[i]][vertices[k]] + dist[vertices[k]][vertices[j]] < dist[vertices[i]][vertices[j]]) {
+							dist[vertices[i]][vertices[j]] = dist[vertices[i]][vertices[k]] + dist[vertices[k]][vertices[j]];
+						}
+					}
+				}
+			}
+
+			document.getElementById('result').value = JSON.stringify(dist, null, 2);
+			document.getElementById('counter').value = counter;
+		}
+
+		function spfa(graph, start) {
+			resetCounter();
+			let distances = {};
+			let queue = [];
+			let inQueue = {};
+			let vertices = Object.keys(graph);
+
+			vertices.forEach((vertex) => {
+				distances[vertex] = Infinity;
+				incrementCounter();
+				inQueue[vertex] = false;
+				incrementCounter();
+			});
+
+			distances[start] = 0;
+			incrementCounter();
+			inQueue[start] = true;
+			incrementCounter();
+			queue.push(start);
+
+			while(queue.length > 0){
+				incrementCounter();
+				let currentNode = queue.shift();
+				incrementCounter();
+				inQueue[currentNode] = false;
+				let edges = graph[currentNode];
+				incrementCounter();
+				if(edges){
+					Object.keys(edges).forEach((toNode) => {
+						incrementCounter();
+						let weight = edges[toNode];
+						let distanceInQuestion = distances[currentNode] + weight;
+						incrementCounter();
+						if(distanceInQuestion < distances[toNode]){
+							distances[toNode] = distanceInQuestion;
+							incrementCounter();
+							if(!inQueue[toNode]){
+								queue.push(toNode);
+								increaseCounter();
+								inQueue[toNode] = true;
+							}
+						}
+					})
+				}
+			}
+
+			document.getElementById('result').value =  JSON.stringify(distances);
+			document.getElementById('counter').value = counter;
+		}
+
+		function dijkstra(graph, start) {
+			resetCounter();
+			let distances = {};
+			let queue = [];
+			let vertices = Object.keys(graph);
+
+			// Step 1: 填充距离数组
+			vertices.forEach((vertex) => {
+				incrementCounter();
+				distances[vertex] = Infinity;
+			});
+			distances[start] = 0;
+
+			// Step 2: 初始化队列
+			queue.push(start);
+			incrementCounter();
+			let visited = new Set();
+			incrementCounter();
+
+			while(queue.length > 0){
+				incrementCounter();
+				let currentNode = queue.shift();
+				incrementCounter();
+				if(visited.has(currentNode)){
+					incrementCounter();
+					continue;
+				} else {
+					visited.add(currentNode);
+					incrementCounter();
+				}
+				let edges = graph[currentNode];
+				incrementCounter();
+				Object.keys(edges).forEach((toNode) =>{
+					incrementCounter();
+					let weight = edges[toNode];
+					let distanceInQuestion = distances[currentNode] + weight;
+					incrementCounter();
+					if(distanceInQuestion < distances[toNode]){
+						distances[toNode] = distanceInQuestion;
+						incrementCounter();
+					}
+					incrementCounter();
+					if(!visited.has(toNode)){
+						queue.push(toNode);
+						incrementCounter();
+					}
+				});
+			}
+			
+			document.getElementById('result').value =  JSON.stringify(distances);
+			document.getElementById('counter').value = counter;
+		}
+
+		// 计数器相关函数
+		function resetCounter() {
+			counter = 0;
+		}
+
+		function incrementCounter() {
+			counter++;
+		}
+
+		function increaseCounter() {
+			counter += 2;
+		}
+
+	</script>
+</html>
+
